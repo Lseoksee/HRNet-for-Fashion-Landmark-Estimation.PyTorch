@@ -140,6 +140,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
     with torch.no_grad():
         end = time.time()
         for i, (input, target, target_weight, meta) in enumerate(val_loader):
+            print(f"에보크: {i}")
             
             target = target.cuda(non_blocking=True).float()
             target_weight = target_weight.cuda(non_blocking=True).float()
