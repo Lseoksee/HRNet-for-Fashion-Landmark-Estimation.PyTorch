@@ -193,9 +193,9 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
 
                 # Transform back from heatmap coordinate to image coordinate
                 preds = preds_local.copy()
-                for i in range(preds_local.shape[0]):
-                    preds[i] = transform_preds(
-                        preds_local[i], c[i], s[i], 
+                for k in range(preds_local.shape[0]):
+                    preds[k] = transform_preds(
+                        preds_local[k], c[k], s[k], 
                         [config.MODEL.HEATMAP_SIZE[0], config.MODEL.HEATMAP_SIZE[1]]
                     )
                 

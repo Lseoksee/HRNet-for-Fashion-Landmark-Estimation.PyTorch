@@ -121,14 +121,17 @@ def main():
             normalize,
         ])
     )
+    print(f"before: {len(valid_dataset)}")
+    
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset,
         # batch_size=cfg.TEST.BATCH_SIZE_PER_GPU*len(cfg.GPUS),
         batch_size=batch_size,
         shuffle=False,
-        num_workers=cfg.WORKERS,
+        num_workers=0,
         pin_memory=True
     )
+    print(f"after: {len(valid_loader)}")
 
     logger.info('=> Start testing...')
     
