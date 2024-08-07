@@ -147,5 +147,4 @@ class JointsDataset(Dataset):
             'category_id': category_id,
             'area': area
         }
-
         return input, target, target_weight, meta
