@@ -9,6 +9,7 @@ from __future__ import division
 from __future__ import print_function
 
 import math
+from typing import Literal
 
 import numpy as np
 import torch
@@ -18,8 +19,10 @@ import cv2
 from core.inference import get_max_preds
 
 
+# 원본이미지 mode="gt"
+# 예측된 결과 이미지 mode="pred"
 def save_batch_image_with_joints(batch_image, batch_joints, batch_joints_vis,
-                                 file_name, nrow=8, padding=2):
+                                 file_name, nrow=8, padding=2, mode: Literal["gt", "pred"] = "gt"):
     '''
     batch_image: [batch_size, channel, height, width]
     batch_joints: [batch_size, num_joints, 3],
@@ -35,6 +38,14 @@ def save_batch_image_with_joints(batch_image, batch_joints, batch_joints_vis,
     ymaps = int(math.ceil(float(nmaps) / xmaps))
     height = int(batch_image.size(2) + padding)
     width = int(batch_image.size(3) + padding)
+    scaling_factor_x = 1 
+    scaling_factor_y = 1 
+    
+    # 예측 이미지 저장시 circle 위치가 이상한 문제 해결
+    if mode == "pred":
+        scaling_factor_x = ndarr.shape[0]/96
+        scaling_factor_y = ndarr.shape[1]/72/nrow
+    
     k = 0
     for y in range(ymaps):
         for x in range(xmaps):
@@ -44,8 +55,8 @@ def save_batch_image_with_joints(batch_image, batch_joints, batch_joints_vis,
             joints_vis = batch_joints_vis[k]
 
             for joint, joint_vis in zip(joints, joints_vis):
-                joint_x = x * width + padding + joint[0]
-                joint_y = y * height + padding + joint[1]
+                joint_x = x * width + padding + joint[0]*scaling_factor_x
+                joint_y = y * height + padding + joint[1]*scaling_factor_y
                 if joint_vis[0]:
                     cv2.circle(ndarr, (int(joint_x), int(joint_y)), 2, [255, 0, 0], 2)
             k = k + 1
@@ -72,11 +83,16 @@ def save_batch_image_with_joints_gt_pred(batch_image,
     ymaps = int(math.ceil(float(nmaps) / xmaps))
     height = int(batch_image.size(2) + padding)
     width = int(batch_image.size(3) + padding)
+    scaling_factor_x = ndarr.shape[0]/96
+    scaling_factor_y = ndarr.shape[1]/72/nrow
+
     k = 0
     for y in range(ymaps):
         for x in range(xmaps):
             if k >= nmaps:
                 break
+            
+            # 원본 점 찍기
             joints = batch_joints_gt[k]
             joints_vis = batch_joints_vis_gt[k]
             for joint, joint_vis in zip(joints, joints_vis):
@@ -84,12 +100,13 @@ def save_batch_image_with_joints_gt_pred(batch_image,
                 joint_y = y * height + padding + joint[1]
                 if joint_vis[0]:
                     cv2.circle(ndarr, (int(joint_x), int(joint_y)), 2, [0, 255, 0], 2)
-            
+
+            # 예측 점 찍기
             joints = batch_joints_pred[k]
             joints_vis = batch_joints_vis_pred[k]
             for joint, joint_vis in zip(joints, joints_vis):
-                joint_x = x * width + padding + joint[0]
-                joint_y = y * height + padding + joint[1]
+                joint_x = x * width + padding + joint[0]*scaling_factor_x
+                joint_y = y * height + padding + joint[1]*scaling_factor_y
                 if joint_vis[0]:
                     cv2.circle(ndarr, (int(joint_x), int(joint_y)), 2, [255, 0, 0], 2)
 
@@ -234,16 +251,19 @@ def save_debug_images(config, input, meta, target, joints_pred, output,
         return
 
     if config.DEBUG.SAVE_BATCH_IMAGES_GT:
+        # 원본이미지 저장
         save_batch_image_with_joints(
             input, meta['joints'], meta['joints_vis'],
-            '{}_gt.jpg'.format(prefix)
+            '{}_gt.jpg'.format(prefix), mode="gt"
         )
     if config.DEBUG.SAVE_BATCH_IMAGES_PRED:
+        # 예측 이미지 저장
         save_batch_image_with_joints(
             input, joints_pred, meta['joints_vis'],
-            '{}_pred.jpg'.format(prefix)
+            '{}_pred.jpg'.format(prefix), mode="pred"
         )
     if config.DEBUG.SAVE_BATCH_IMAGES_GT_PRED:
+        # 원본 + 예측 이미지 저장
         if config.TEST.USE_GT_BBOX == False:
             return
         save_batch_image_with_joints_gt_pred(input, 
