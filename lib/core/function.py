@@ -140,7 +140,6 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
     with torch.no_grad():
         end = time.time()
         for i, (input, target, target_weight, meta) in enumerate(val_loader):
-            print(meta)
             if i == 1:
                 break
             print(f"에보크: {i}")

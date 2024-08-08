@@ -133,7 +133,6 @@ def main():
         num_workers=0,
         pin_memory=True,
     )
-    print(valid_loader.dataset)
     logger.info("=> Start testing...")
 
     # evaluate on validation set
