@@ -140,6 +140,9 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
     with torch.no_grad():
         end = time.time()
         for i, (input, target, target_weight, meta) in enumerate(val_loader):
+            print(meta)
+            if i == 1:
+                break
             print(f"에보크: {i}")
             
             target = target.cuda(non_blocking=True).float()
@@ -206,7 +209,7 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
 
             num_images = input.size(0)
             # measure accuracy and record loss
-            losses.update(loss.item(), num_images)
+            # losses.update(loss.item(), num_images)
             
             _, avg_acc, cnt, pred = accuracy(output.detach().cpu().numpy(), 
                                         target.detach().cpu().numpy(),

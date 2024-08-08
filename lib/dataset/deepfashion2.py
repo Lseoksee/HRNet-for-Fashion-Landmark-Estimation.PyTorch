@@ -128,9 +128,6 @@ class DeepFashion2Dataset(JointsDataset):
         self.db = self._get_db()
         print('Done (t={:0.2f}s)'.format(time.time()- tic))
 
-        if is_train and cfg.DATASET.SELECT_DATA:
-            self.db = self.select_data(self.db)
-
         logger.info('=> load {} samples'.format(len(self.db)))
 
     def _get_ann_file_keypoint(self):
@@ -228,11 +225,12 @@ class DeepFashion2Dataset(JointsDataset):
                 joints_3d_vis[ipt, 1] = t_vis
                 joints_3d_vis[ipt, 2] = 0
 
-            center, scale = self._box2cs(obj['clean_bbox'][:4])
+            _, scale = self._box2cs(obj['clean_bbox'][:4])
+            
             rec.append({
                 'image': self.image_path_from_index(index),
-                'center': center,
-                'scale': scale,
+                'center': np.array([144. , 192.]),
+                'scale':  np.array([1. , 1.]),
                 'joints_3d': joints_3d,
                 'joints_3d_vis': joints_3d_vis,
                 'filename': '',
@@ -265,7 +263,7 @@ class DeepFashion2Dataset(JointsDataset):
 
     def image_path_from_index(self, index):
         file_name = '%06d.jpg' % index
-        file_name = os.path.join('image', file_name)
+        file_name = os.path.join('image2', file_name)
 
         image_path = os.path.join(self.root, self.image_set, file_name)
 
