@@ -22,13 +22,13 @@ from core.inference import get_max_preds
 # 원본이미지 mode="gt"
 # 예측된 결과 이미지 mode="pred"
 def save_batch_image_with_joints(batch_image, batch_joints, batch_joints_vis,
-                                 file_name, nrow=8, padding=2, mode: Literal["gt", "pred"] = "gt"):
-    '''
-    batch_image: [batch_size, channel, height, width]
-    batch_joints: [batch_size, num_joints, 3],
-    batch_joints_vis: [batch_size, num_joints, 1],
-    }
-    '''
+                                 file_name, nrow=1, padding=2, mode: Literal["gt", "pred"] = "gt"):
+    """
+    Args:
+        mode: 원본이미지: `gt`, 예측된 결과 이미지: `pred`
+        nrow: 배치크기 보정수치 (배치크기가 재조정되면 거기에 맞게 설정 필요)
+    """
+    
     grid = torchvision.utils.make_grid(batch_image, nrow, padding, True)
     ndarr = grid.mul(255).clamp(0, 255).byte().permute(1, 2, 0).cpu().numpy()
     ndarr = ndarr.copy()
