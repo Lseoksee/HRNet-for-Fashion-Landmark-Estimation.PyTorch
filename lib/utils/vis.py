@@ -25,7 +25,7 @@ def save_batch_image_with_joints(batch_image, batch_joints, batch_joints_vis,
                                  file_name, nrow=1, padding=2, mode: Literal["gt", "pred"] = "gt"):
     """
     Args:
-        mode: 원본이미지: `gt`, 예측된 결과 이미지: `pred`
+        mode: 원본이미지: `gt`</br>예측된 결과 이미지: `pred`
         nrow: 배치크기 보정수치 (배치크기가 재조정되면 거기에 맞게 설정 필요)
     """
     
