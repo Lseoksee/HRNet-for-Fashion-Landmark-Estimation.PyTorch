@@ -78,7 +78,7 @@ class JointsDataset(Dataset):
             )
         else:
             data_numpy = cv2.imread(
-                image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
+                image_file, cv2.IMREAD_COLOR
             )
 
         if self.color_rgb:
