@@ -56,22 +56,25 @@ class JointsDataset(Dataset):
         self.transform = transform
         self.db = []
 
-    def __len__(self,):
+    def __len__(
+        self,
+    ):
         return len(self.db)
 
     def __getitem__(self, idx):
         db_rec = copy.deepcopy(self.db[idx])
 
-        image_file = db_rec['image']
-        filename = db_rec['filename'] if 'filename' in db_rec else ''
-        imgnum = db_rec['imgnum'] if 'imgnum' in db_rec else ''
-        category_id = db_rec['category_id'] if 'category_id' in db_rec else ''
-        area = db_rec['area'] if 'area' in db_rec else ''
+        image_file = db_rec["image"]
+        filename = db_rec["filename"] if "filename" in db_rec else ""
+        imgnum = db_rec["imgnum"] if "imgnum" in db_rec else ""
+        category_id = db_rec["category_id"] if "category_id" in db_rec else ""
+        area = db_rec["area"] if "area" in db_rec else ""
 
-        if self.data_format == 'zip':
+        if self.data_format == "zip":
             from utils import zipreader
+
             data_numpy = zipreader.imread(
-                image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
+                image_file, cv2.IMREAD_COLOR
             )
         else:
             data_numpy = cv2.imread(
@@ -82,21 +85,31 @@ class JointsDataset(Dataset):
             data_numpy = cv2.cvtColor(data_numpy, cv2.COLOR_BGR2RGB)
 
         if data_numpy is None:
-            logger.error('=> fail to read {}'.format(image_file))
-            raise ValueError('Fail to read {}'.format(image_file))
+            logger.error("=> fail to read {}".format(image_file))
+            raise ValueError("Fail to read {}".format(image_file))
 
-        joints = db_rec['joints_3d']
-        joints_vis = db_rec['joints_3d_vis']
+        joints = db_rec["joints_3d"]
+        joints_vis = db_rec["joints_3d_vis"]
 
-        c = db_rec['center']
-        s = db_rec['scale']
-        score = db_rec['score'] if 'score' in db_rec else 1
+        c = db_rec["center"]
+        s = db_rec["scale"]
+        score = db_rec["score"] if "score" in db_rec else 1
         r = 0
 
         trans = get_affine_transform(c, s, r, self.image_size)
+        
+        # 이미지를 288x384로 크롭하는 코드
+        y, x, _ = data_numpy.shape
+        start_x = x // 2 - int(self.image_size[0]) // 2
+        start_y = y // 2 - int(self.image_size[1]) // 2
+        input = cv2.warpAffine(
+            data_numpy,
+            np.float32([[1, 0, -start_x], [0, 1, -start_y]]),
+            (int(self.image_size[0]), int(self.image_size[1])),
+        )
 
         if self.transform:
-            data_numpy = self.transform(data_numpy)
+            input = self.transform(input)
 
         for i in range(self.num_joints):
             if joints_vis[i, 0] > 0.0:
@@ -108,16 +121,16 @@ class JointsDataset(Dataset):
         target_weight = torch.from_numpy(target_weight)
 
         meta = {
-            'image': image_file,
-            'filename': filename,
-            'imgnum': imgnum,
-            'joints': joints,
-            'joints_vis': joints_vis,
-            'center': c,
-            'scale': s,
-            'rotation': r,
-            'score': score,
-            'category_id': category_id,
-            'area': area
+            "image": image_file,
+            "filename": filename,
+            "imgnum": imgnum,
+            "joints": joints,
+            "joints_vis": joints_vis,
+            "center": c,
+            "scale": s,
+            "rotation": r,
+            "score": score,
+            "category_id": category_id,
+            "area": area,
         }
-        return data_numpy, target, target_weight, meta
+        return input, target, target_weight, meta

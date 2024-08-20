@@ -227,13 +227,12 @@ class DeepFashion2Dataset(JointsDataset):
                 joints_3d_vis[ipt, 1] = t_vis
                 joints_3d_vis[ipt, 2] = 0
 
-            _, scale = self._box2cs(obj['clean_bbox'][:4])
-            
-            #TODO: 스케일, 센터 값 고정해 둠
+            #TODO: 스케일, 센터 값 으로함
+            #이게 나중에 사진 축소, 조정 할때 쓰이는데 난 이거 개무시 할꺼라
             rec.append({
                 'image': self.image_path_from_index(index),
-                'center': np.array([144. , 192.]),
-                'scale':  np.array([1. , 1.]),
+                'center': np.array([0. , .0]),
+                'scale':  np.array([0. , 0.]),
                 'joints_3d': joints_3d,
                 'joints_3d_vis': joints_3d_vis,
                 'filename': '',
