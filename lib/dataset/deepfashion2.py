@@ -115,7 +115,6 @@ class DeepFashion2Dataset(JointsDataset):
                 x1 = pair[1] + start_idx - 1
                 cat_pairs.append([x0,x1])
             self.flip_pairs.append(cat_pairs)
-        
         self.parent_ids = None
 
         self.joints_weight = np.ones((self.num_joints, 1), dtype=np.float32
@@ -171,6 +170,7 @@ class DeepFashion2Dataset(JointsDataset):
             gt_db.extend(self._load_coco_keypoint_annotation_kernal(index))
         return gt_db
 
+    #TODO: 해당 함수가 사용됨
     def _load_coco_keypoint_annotation_kernal(self, index):
         """
         coco ann: [u'segmentation', u'area', u'iscrowd', u'image_id', u'bbox', u'category_id', u'id']
@@ -192,6 +192,8 @@ class DeepFashion2Dataset(JointsDataset):
         # sanitize bboxes
         valid_objs = []
         for obj in objs:
+            #TODO: 이거 category_id 값을 1로 고정해서 반팔만 인식하도록 설계함 
+            obj['category_id'] = 1
             x, y, w, h = obj['bbox']
             x1 = np.max((0, x))
             y1 = np.max((0, y))
@@ -227,6 +229,7 @@ class DeepFashion2Dataset(JointsDataset):
 
             _, scale = self._box2cs(obj['clean_bbox'][:4])
             
+            #TODO: 스케일, 센터 값 고정해 둠
             rec.append({
                 'image': self.image_path_from_index(index),
                 'center': np.array([144. , 192.]),

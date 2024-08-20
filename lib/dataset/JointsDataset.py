@@ -93,37 +93,10 @@ class JointsDataset(Dataset):
         score = db_rec['score'] if 'score' in db_rec else 1
         r = 0
 
-        if self.is_train:
-            # if (np.sum(joints_vis[:, 0]) > self.num_joints_half_body
-            #     and np.random.rand() < self.prob_half_body):
-            #     c_half_body, s_half_body = self.half_body_transform(
-            #         joints, joints_vis
-            #     )
-            #     if c_half_body is not None and s_half_body is not None:
-            #         c, s = c_half_body, s_half_body
-            
-            sf = self.scale_factor
-            rf = self.rotation_factor
-            s = s * np.clip(np.random.randn()*sf + 1, 1 - sf, 1 + sf)
-            r = np.clip(np.random.randn()*rf, -rf*2, rf*2) \
-                if random.random() <= 0.6 else 0
-
-            if self.flip and random.random() <= 0.5:
-                data_numpy = data_numpy[:, ::-1, :]
-                joints, joints_vis = fliplr_joints(
-                    # joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
-                    joints, joints_vis, data_numpy.shape[1], self.flip_pairs[category_id-1])
-                c[0] = data_numpy.shape[1] - c[0] - 1
-
         trans = get_affine_transform(c, s, r, self.image_size)
-        input = cv2.warpAffine(
-            data_numpy,
-            trans,
-            (int(self.image_size[0]), int(self.image_size[1])),
-            flags=cv2.INTER_LINEAR)
 
         if self.transform:
-            input = self.transform(input)
+            data_numpy = self.transform(data_numpy)
 
         for i in range(self.num_joints):
             if joints_vis[i, 0] > 0.0:
@@ -147,4 +120,4 @@ class JointsDataset(Dataset):
             'category_id': category_id,
             'area': area
         }
-        return input, target, target_weight, meta
+        return data_numpy, target, target_weight, meta

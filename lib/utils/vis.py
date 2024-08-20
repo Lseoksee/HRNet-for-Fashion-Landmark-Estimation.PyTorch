@@ -51,13 +51,17 @@ def save_batch_image_with_joints(batch_image, batch_joints, batch_joints_vis,
         for x in range(xmaps):
             if k >= nmaps:
                 break
+            # 예측한 점
             joints = batch_joints[k]
+            # 원본점
             joints_vis = batch_joints_vis[k]
 
             for joint, joint_vis in zip(joints, joints_vis):
                 joint_x = x * width + padding + joint[0]*scaling_factor_x
                 joint_y = y * height + padding + joint[1]*scaling_factor_y
-                if joint_vis[0]:
+                if  (joint[0] or joint[1]) and mode=="pred":
+                    cv2.circle(ndarr, (int(joint_x), int(joint_y)), 2, [255, 0, 0], 2)
+                elif (joint_vis[0] or joint_vis[1]) and mode=="gt":
                     cv2.circle(ndarr, (int(joint_x), int(joint_y)), 2, [255, 0, 0], 2)
             k = k + 1
     cv2.imwrite(file_name, ndarr)
