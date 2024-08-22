@@ -153,8 +153,9 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
             score = meta['score'].numpy()
 
             channel_mask = torch.zeros_like(target_weight).float()
+            #TODO: 이게 의류종류에 따라 결과값이 달라지는 원흉임
             for j, cat_id in enumerate(cat_ids):
-                rg = val_dataset.gt_class_keypoints_dict[int(cat_id)]
+                rg = val_dataset.gt_class_keypoints_dict[int(1)]
                 index = torch.tensor([list(range(rg[0], rg[1]))], device=channel_mask.device, dtype=channel_mask.dtype).transpose(1,0).long()
                 channel_mask[j].scatter_(0, index, 1)
                 
@@ -162,35 +163,10 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
             output = model(input)
 
             if config.MODEL.TARGET_TYPE == 'gaussian':
-                if config.TEST.FLIP_TEST:
-                    # this part is ugly, because pytorch has not supported negative index
-                    # input_flipped = model(input[:, :, :, ::-1])
-                    input_flipped = np.flip(input.cpu().numpy(), 3).copy()
-                    input_flipped = torch.from_numpy(input_flipped).cuda()
-                    outputs_flipped = model(input_flipped)
-
-                    if isinstance(outputs_flipped, list):
-                        output_flipped = outputs_flipped[-1]
-                    else:
-                        output_flipped = outputs_flipped
-                    output_flipped = output_flipped.cpu().numpy()
-                    
-                    category_id_list = meta['category_id'].cpu().numpy().copy()
-                    for j, category_id in enumerate(category_id_list):
-                        output_flipped[j, :, :, :] = flip_back(output_flipped[j, None],
-                                                val_dataset.flip_pairs[category_id-1],
-                                                config.MODEL.HEATMAP_SIZE[0])
-                    output_flipped = torch.from_numpy(output_flipped.copy()).cuda()
-
-                    # feature is not aligned, shift flipped heatmap for higher accuracy
-                    if config.TEST.SHIFT_HEATMAP:
-                        output_flipped[:, :, :, 1:] = \
-                            output_flipped.clone()[:, :, :, 0:-1]
-
-                    output = (output + output_flipped) * 0.5
-
                 # block irrelevant channels in output
                 output = output * channel_mask.unsqueeze(3)
+                
+                #TODO: 여기가 실제 예측 키포인트 나오는 곳!!!
                 preds_local, maxvals = get_final_preds(config, output.detach().cpu().numpy(), c, s)
 
                 # Transform back from heatmap coordinate to image coordinate

@@ -119,7 +119,8 @@ class JointsDataset(Dataset):
 
         target = torch.from_numpy(target)
         target_weight = torch.from_numpy(target_weight)
-
+    
+        #아주 재미있는것이 실제 input 그니까 이미지 백터를 건드는건 정규화 빼고는 없음
         meta = {
             "image": image_file,
             "filename": filename,

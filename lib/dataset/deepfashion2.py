@@ -192,8 +192,8 @@ class DeepFashion2Dataset(JointsDataset):
         # sanitize bboxes
         valid_objs = []
         for obj in objs:
-            #TODO: 이거 category_id 값을 1로 고정해서 반팔만 인식하도록 설계함 
-            obj['category_id'] = 1
+            #TODO: 이거 category_id 값을 1로 고정해서 반팔만 인식하도록 설계함
+            obj['category_id'] = 13
             x, y, w, h = obj['bbox']
             x1 = np.max((0, x))
             y1 = np.max((0, y))
