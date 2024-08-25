@@ -1,4 +1,4 @@
-source /opt/conda/etc/profile.d/conda.sh
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate ./.conda
 
 python tools/test.py \

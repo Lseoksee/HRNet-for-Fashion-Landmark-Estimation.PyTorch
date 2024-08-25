@@ -79,8 +79,6 @@ target/
 
 *.ipynb
 *.params
-*.json
-.vscode/
 
 lib/pycocotools/_mask.c
 lib/nms/cpu_nms.c

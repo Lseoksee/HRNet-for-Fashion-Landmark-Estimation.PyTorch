@@ -1,5 +1,5 @@
 EasyDict==1.7
-opencv-python==4.2.0.32
+opencv-python
 shapely
 Cython
 scipy
@@ -9,3 +9,4 @@ json_tricks
 scikit-image
 yacs>=0.1.5
 tensorboardX==1.6
+pycocotools
